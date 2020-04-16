@@ -1,0 +1,462 @@
+<!-- {% load static %} -->
+
+{% load staticfiles %}
+
+
+<!DOCTYPE html>
+
+
+<html lang="en">
+<head> 
+	 <title>AG</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<link href="{% static 'dist/css/bootstrap.min.css' %}" rel="stylesheet" />
+    <script src="{% static 'dist/js/bootstrap.js' %}"> </script>
+    <script src="{% static 'dist/js/main.js' %}"> </script>
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+ 
+  <link href="{% static 'dist/css/style.css' %}" rel="stylesheet">
+
+
+<script type="text/javascript">
+  var all_data= {};
+  var var_Statut=0;
+  var type_data={{ type_data|safe }};
+  var d_data={{d_data|safe }};
+
+  function fun_save() {
+
+    var c = document.getElementById("id_bathint").childNodes[0].childNodes[0].children;
+    var txt =0;
+    var i;
+    for (i = 0; i < c.length; i++) {
+      txt = txt + parseFloat(c[i].childNodes[0].value);
+    }
+    var flag=!Number.isNaN(txt)
+    var flag2 =(txt ==parseFloat(document.getElementById("id_volumebatch").value))
+    if (flag &&flag2) {
+      var a=document.getElementById("id_nb").value
+      if (a == undefined||a== null||a==0) {
+        return false;
+      }
+      else{
+        save_data();
+        var aa= JSON.stringify(all_data);
+
+        $.ajax({
+          url: 'save_page/',
+          data: {
+            'aa':aa
+          },
+          dataType: 'json',
+          type: 'POST',
+          success: function(data) {
+
+          }
+        });}
+      } else {
+        alert("volumebatch  != somm bathint  or string in bathint ")
+      } 
+
+
+    };
+
+  function str_ag() { 
+            console.log('1') 
+            document.getElementById("bt_pause").style.display = "block";
+            document.getElementById("bt_stop_pros").style.display = "block";
+
+            document.getElementById("bt_res").style.display = "none";
+            document.getElementById("bt_save").style.display = "none";
+            fun_res.resume();
+            var Statut=document.getElementById("Statut");
+            Statut.innerText='';
+            $( "#Statut" ).append( $.parseHTML( '<h1> start </h1>' ) );
+            var_Statut=1;
+            $.ajax({
+            url: 'str_ag/',
+            type: 'GET',
+            success: function(res) {
+              var text = res.responseText;
+            },
+            complete: function(response) {
+
+
+
+              if (response.status ==200) {
+
+                var html = $.parseHTML( response.responseText );
+                
+                var b=document.getElementById("resres");
+                b.innerText="";
+                var $log = $( "#resres" );
+                $log.append( html );
+
+              } 
+              else {
+                var b=document.getElementById("resres");
+                b.innerText="err";
+              }
+
+
+            }
+                  }); 
+            console.log('4') }
+
+  function get_response_res() {  
+
+        $.ajax({
+          url: 'get_res_page/',
+          type: 'GET',
+          success: function(res) {
+            var text = res;
+
+          },
+          complete: function(response) {
+
+
+            if (response.status ==200) {
+              var html = $.parseHTML( response.responseJSON.res );
+              // console.log(response.status)
+              var b=document.getElementById("resres");
+              b.innerText="";
+              var $log = $( "#resres" );
+              $log.append( html );
+              var b=document.getElementById("crono");
+              b.innerText=response.responseJSON.dif
+
+            } 
+            else {
+              // var b=document.getElementById("resres");
+              // b.innerText="uuuuuuuuuuuuuuuu";
+            }
+
+
+          }
+        });}
+  function fun_res_l() {
+
+          if (var_Statut==0) {
+            str_ag();
+            
+            get_response_res();} 
+            else if (var_Statut==1) {
+              get_response_res()
+            } 
+            else if (var_Statut==2) {
+              var Statut=document.getElementById("Statut");
+              Statut.innerText='';
+              $( "#Statut" ).append( $.parseHTML( '<h1> stop </h1>' ) );
+              var_Statut=3;} 
+              else {  
+              }
+
+
+            };
+  var var_fun_res_l=fun_res_l
+  function RecurringTimer(callback, delay) {
+       var timerId, start, remaining = delay;
+
+    this.pause = function() {
+        window.clearTimeout(timerId);
+        remaining -= new Date() - start;
+    };
+
+    var resume = function() {
+        start = new Date();
+        timerId = window.setTimeout(function() {
+            remaining = delay;
+            resume();
+            callback();
+        }, remaining);
+    };
+
+    this.resume = resume;
+
+    this.resume();
+      }
+
+  function fun_stop_pros() {
+              document.getElementById("bt_pause").style.display = "none";
+              document.getElementById("bt_resume").style.display = "none";
+              document.getElementById("bt_stop_pros").style.display = "none";
+
+              document.getElementById("bt_res").style.display = "block";
+             document.getElementById("bt_save").style.display = "block";
+              $.ajax({
+                url: 'stop_pros/',
+                data: {'aa':"aa"},
+                dataType: 'json',
+                type: 'POST',
+                success: function(data) {
+
+                }
+              });};
+
+
+  function fun_pause() {
+            document.getElementById("bt_pause").style.display = "none";
+            document.getElementById("bt_resume").style.display = "block";
+            fun_res.pause()}
+  function fun_resume() {
+          document.getElementById("bt_resume").style.display = "none";
+            document.getElementById("bt_pause").style.display = "block";
+            fun_res.resume()}
+  var fun_res = new RecurringTimer(get_response_res, 3000);
+  fun_res.pause()
+</script>
+<style>
+  .crono_wrapper {text-align:center;width:200px;}
+</style>
+
+</head>
+<body>
+ <div class="row">
+  <div class="col-sm-4">
+  
+ </div> 
+ <input style="text-align:center;" type="button" class="submit" id="bt_stop_pros" value="stop_pros" onclick="fun_stop_pros()"/>
+ <input style="text-align:center;display :none;" type="button" class="submit" id="bt_res" value="res" onclick="str_ag()"/>
+  <input style="text-align:center;display :none;" type="button" class="submit" id="bt_save" value="save" onclick="fun_save()"/>
+<input type="button" style="text-align:center;display :none;" value="pause" id="bt_pause" onclick="fun_pause()"/>
+<input type="button" style="text-align:center;"  value="resume" id="bt_resume" onclick="fun_resume()"/>
+<!-- <input type="button" style="text-align:center;"  value="test" id="bt_test" onclick="get_response_res()"/> -->
+
+</div> 
+  
+  <!-- <div class="col-sm-2"><input style="text-align:center;" type="button" class="submit" value="res" onclick="getres()"></div> -->
+ 
+  <div class="col-sm-4"></div>
+  <div id="Statut" class="col-sm-2">
+    <h1>stop</h1>
+  </div>
+  <h2 id='crono'>00:00:00</h2>
+
+
+
+ 
+
+
+
+<div class="col-sm-12">
+
+
+  <div class="tab">
+    <button class="tablinks" onclick="opendata(event, 'd_nb')">entri 1</button>
+    <button class="tablinks" onclick="opendata(event, 'd_nb2')">entri 2</button>
+    <button class="tablinks" onclick="opendata(event, 'res')">res</button>
+  </div>
+
+
+  <div id="d_nb" class="tabcontent" style='width:100%;height:100%'>
+    <table style="width:100%">
+
+ <tr>
+
+
+      <td>
+        <div id="id_cont_dem_c" style=" grid-gap: 4px; grid-template-columns: 1fr 10px;">
+          cont_dem : <input style="text-align:center;" type="checkbox" value="cont_dem" id="id_cont_dem" />
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <div id="id_nb_c" style=" grid-gap: 4px; grid-template-columns: 1fr 10px;">
+          nb :<input style="text-align:center;" type="number"  id="id_nb">
+        </div>
+      </tr>
+
+      <tr>
+      <td>
+        <div id="id_num_prob_c" style=" grid-gap: 4px; grid-template-columns: 1fr 10px;">
+          num_prob :<input style="text-align:center;" type="number"  id="id_num_prob">
+        </div>
+      </tr>
+
+      <tr>
+        <td>
+          <div id="id_ndepo_c" style=" grid-gap: 4px; grid-template-columns: 1fr 120px;">
+            ndepo :<input style="text-align:center;" type="number"  id="id_ndepo">
+          </div>
+        </tr>
+
+        <tr>
+          <td>
+            <div id="id_temps_sum_c" style=" grid-gap: 4px; grid-template-columns: 1fr 120px;">
+              temps_sum :<input style="text-align:center;" type="number"  id="id_temps_sum">
+            </div>
+          </tr>
+
+        
+
+            <tr>
+              <td>
+                <div id="id_nprod_c" style=" grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                  nprod :<input style="text-align:center;" type="number"  id="id_nprod">
+                </div>
+              </tr>
+
+              <tr>
+                <td>
+                  <div id="id_t_population_c" style=" grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                    t_population :<input style="text-align:center;" type="number"  id="id_t_population">
+                  </div>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div id="id_crit_dar_c" style=" grid-gap: 4px; grid-template-columns: 1fr 120px;">crit_dar   :<input style="text-align:center;" type="number"  id="id_crit_dar">
+                    </div>
+                  </tr>
+
+
+                  <tr>
+                    <td>
+                      <div id="id_volumebatch_c" style=" grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                        volumebatch : <input style="text-align:center;" type="number" step=0.01 id="id_volumebatch" >
+                      </div>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        <div id="id_delai_fin_c" style=" grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                          delai_fin : <input style="text-align:center;" type="number" step=0.01 id="id_delai_fin" >
+                        </div>
+                      </tr>
+
+                    </table>
+
+                  </div>
+
+
+                  <div id="d_nb2" class="tabcontent" style='width:100%;height:100%'>
+                    <table>
+                      <tr>
+                        <td><a class="expand" data-expand="id_produits_c"  onclick="expand(this)"></a>
+                          <a class="noselect" onclick="expand(this.previousElementSibling)">id_produits</a></td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div id="id_produits_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                              <table id="id_produits" >
+                              </table>
+                            </div>
+                          </tr>
+                       
+                                  <tr>
+                                    <td><a class="expand" data-expand="id_depots_c"  onclick="expand(this)"></a>
+                                      <a class="noselect" onclick="expand(this.previousElementSibling)">id_depots</a></td>
+                                    </tr>
+                                    <tr>
+                                      <td>
+                                        <div id="id_depots_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                          <table id="id_depots" >
+                                          </table>
+                                        </div>
+                                      </tr>
+                                      <tr>
+                                        <td><a class="expand" data-expand="id_co_pom_inj_c"  onclick="expand(this)"></a>
+                                          <a class="noselect" onclick="expand(this.previousElementSibling)">id_co_pom_inj</a></td>
+                                        </tr>
+                                        <tr>
+                                          <td>
+                                            <div id="id_co_pom_inj_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                              <table id="id_co_pom_inj" >
+                                              </table>
+                                            </div>
+                                          </tr>
+                                          <tr>
+                                            <td><a class="expand" data-expand="id_co_inj_c"  onclick="expand(this)"></a>
+                                              <a class="noselect" onclick="expand(this.previousElementSibling)">id_co_inj</a></td>
+                                            </tr>
+                                            <tr>
+                                              <td>
+                                                <div id="id_co_inj_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                                  <table id="id_co_inj" >
+                                                  </table>
+                                                </div>
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <td><a class="expand" data-expand="id_cont_entr_c"  onclick="expand(this)"></a>
+                                                  <a class="noselect" onclick="expand(this.previousElementSibling)">id_cont_entr</a></td>
+                                                </tr>
+                                                <tr>
+                                                  <td>
+                                                    <div id="id_cont_entr_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                                      <table id="id_cont_entr" >
+                                                      </table>
+                                                    </div>
+                                                  </tr>
+                                                  <tr>
+                                                    <td><a class="expand" data-expand="id_Demdepo_c"  onclick="expand(this)"></a>
+                                                      <a class="noselect" onclick="expand(this.previousElementSibling)">id_Demdepo</a></td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td>
+                                                        <div id="id_Demdepo_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                                          <table id="id_Demdepo" >
+                                                          </table>
+                                                        </div>
+                                                      </tr>
+
+
+                                                      <td><a class="expand" data-expand="id_stok_in_c"  onclick="expand(this)"></a>
+                                                      <a class="noselect" onclick="expand(this.previousElementSibling)">id_stok_in</a></td>
+                                                    </tr>
+                                                    <tr>
+                                                      <td>
+                                                        <div id="id_stok_in_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                                          <table id="id_stok_in" >
+                                                          </table>
+                                                        </div>
+                                                      </tr>
+
+                                                      
+                                                      <tr>
+                                                        <td><a class="expand" data-expand="id_bathint_c"  onclick="expand(this)"></a>
+                                                          <a class="noselect" onclick="expand(this.previousElementSibling)">id_bathint</a></td>
+                                                        </tr>
+                                                        <tr>
+                                                          <td>
+                                                            <div id="id_bathint_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                                                      <input style="text-align:center;" type="button" class="submit" id="bt_moin_bathint" value="moin_bathint" onclick="fun_moin_bathint()">
+                                                                                                          <input style="text-align:center;" type="button" class="submit" id="bt_plus_bathint" value="plus_bathint" onclick="fun_plus_bathint()">
+                                                              <table id="id_bathint" >
+                                                              </table>
+                                                            </div>
+                                                          </tr>
+                                                          <tr>
+                                                            <td><a class="expand" data-expand="id_Localdep_c"  onclick="expand(this)"></a>
+                                                              <a class="noselect" onclick="expand(this.previousElementSibling)">id_Localdep</a></td>
+                                                            </tr>
+                                                            <tr>
+                                                              <td>
+                                                                <div id="id_Localdep_c" style="display: none; grid-gap: 4px; grid-template-columns: 1fr 120px;">
+                                                                  <table id="id_Localdep" >
+                                                                  </table>
+                                                                </div>
+                                                              </tr>
+
+                                                            </table>
+                                                          </div>
+                                                          <div id="res" class="tabcontent" style='width:100%;height:100%'>
+                                                            <div id="resres">
+                                                              
+</div>
+                                                          </div>
+                                                        </div>
+<script > 
+	window.onload = function () { 
+  lode_data();
+  opendata(event, 'd_nb');
+
+
+    }
+document.getElementById("resres").addEventListener("load", lode_data);
+</script>
+
+                                                      </body>
+                                                      </html>
