@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hello, World!</title>
+        
+        <script type="text/javascript" src="/eel/eel.js"></script>
+        <script type="text/javascript">
+        
+        eel.expose(say_hello_js);               // Expose this function to Python
+        function say_hello_js(x) {
+            console.log("Hello from " + x);
+        }
+        
+        say_hello_js("Javascredefefpt World!");
+        // eel.say_hello_py("Javascrfeefefefipt World!");  // Call a Python function
+        
+        </script>
+    </head>
+    
+    <body>
+         <div class="row">
+  <div class="col-sm-2"><input type="button" class="submit" value="save" onclick="say_hello_js('Javascript World')"></div>
+  <div class="col-sm-2"><input type="button" class="submit" value="lode" onclick="eel.say_hello_py('Javascript World!ggg')"></div>
+  <div class="col-sm-2"><input type="button" class="submit" value="res" onclick="eel.getres()"></div>
+  <div class="col-sm-4"></div>
+   <div id="Statut" class="col-sm-2">
+      <h1>stop</h1>
+    </div>
+</div>
+        Hello, World!
+    </body>
+</html>
